@@ -15,9 +15,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/will7200/mda/da"
-	"github.com/will7200/mdar/mda/endpoints"
-	mdahttp "github.com/will7200/mdar/mda/http"
-	"github.com/will7200/mdar/mda/service"
+	"github.com/will7200/mda/mda/endpoints"
+	mdahttp "github.com/will7200/mda/mda/http"
+	"github.com/will7200/mda/mda/service"
 )
 
 var (

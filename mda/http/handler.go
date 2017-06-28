@@ -7,69 +7,80 @@ import (
 
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
-	"github.com/will7200/mdar/mda/endpoints"
+	"github.com/will7200/mda/mda/endpoints"
 )
 
 // NewHTTPHandler returns a handler that makes a set of endpoints available on
 // predefined paths.
-func NewHTTPHandler(endpoints endpoints.Endpoints) http.Handler {
-	m := mux.NewRouter()
-	opts := []httptransport.ServerOption{}
-	m.Handle("add", httptransport.NewServer(
+func NewHTTPHandler(endpoints endpoints.Endpoints) *mux.Router {
+	t := mux.NewRouter()
+	t.StrictSlash(true)
+	m := t.PathPrefix("/mda").Subrouter()
+	opts := []httptransport.ServerOption{
+		httptransport.ServerErrorEncoder(errorEncoder),
+	}
+	m.Handle("/", httptransport.NewServer(
 		endpoints.AddEndpoint,
 		DecodeAddRequest,
 		EncodeAddResponse,
 		opts...,
-	))
-	m.Handle("start", httptransport.NewServer(
+	)).Methods("POST")
+	m.Handle("/start/{id}", httptransport.NewServer(
 		endpoints.StartEndpoint,
 		DecodeStartRequest,
 		EncodeStartResponse,
 		opts...,
-	))
-	m.Handle("remove", httptransport.NewServer(
+	)).Methods("POST")
+	m.Handle("/remove/{id}", httptransport.NewServer(
 		endpoints.RemoveEndpoint,
 		DecodeRemoveRequest,
 		EncodeRemoveResponse,
 		opts...,
-	))
-	m.Handle("change", httptransport.NewServer(
+	)).Methods("POST")
+	m.Handle("/change/{id}", httptransport.NewServer(
 		endpoints.ChangeEndpoint,
 		DecodeChangeRequest,
 		EncodeChangeResponse,
 		opts...,
-	))
-	m.Handle("get", httptransport.NewServer(
+	)).Methods("PUT")
+	m.Handle("/{id}", httptransport.NewServer(
 		endpoints.GetEndpoint,
 		DecodeGetRequest,
 		EncodeGetResponse,
 		opts...,
-	))
-	m.Handle("list", httptransport.NewServer(
+	)).Methods("GET")
+	m.Handle("/", httptransport.NewServer(
 		endpoints.ListEndpoint,
 		DecodeListRequest,
 		EncodeListResponse,
 		opts...,
-	))
-	m.Handle("enable", httptransport.NewServer(
+	)).Methods("GET")
+	m.Handle("/enable", httptransport.NewServer(
 		endpoints.EnableEndpoint,
 		DecodeEnableRequest,
 		EncodeEnableResponse,
 		opts...,
-	))
-	m.Handle("disable", httptransport.NewServer(
+	)).Methods("POST")
+	m.Handle("/disable", httptransport.NewServer(
 		endpoints.DisableEndpoint,
 		DecodeDisableRequest,
 		EncodeDisableResponse,
 		opts...,
-	))
-	m.Handle("try", httptransport.NewServer(
-		endpoints.TryEndpoint,
-		DecodeTryRequest,
-		EncodeTryResponse,
-		opts...,
-	)).Methods("GET", "PUT", "DELETE")
-	return m
+	)).Methods("POST")
+	return t
+}
+
+type errorWrapper struct {
+	Error string `json:"error"`
+}
+
+func errorEncoder(_ context.Context, err error, w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	code := http.StatusInternalServerError
+	msg := err.Error()
+
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(errorWrapper{Error: msg})
 }
 
 // DecodeAddRequest is a transport/http.DecodeRequestFunc that decodes a
@@ -155,9 +166,9 @@ func EncodeGetResponse(_ context.Context, w http.ResponseWriter, response interf
 // DecodeListRequest is a transport/http.DecodeRequestFunc that decodes a
 // JSON-encoded request from the HTTP request body. Primarily useful in a server.
 func DecodeListRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	req = endpoints.ListRequest{}
-	err = json.NewDecoder(r.Body).Decode(&r)
-	return req, err
+	//req = endpoints.ListRequest{}
+	//err = json.NewDecoder(r.Body).Decode(&r)
+	return nil, nil
 }
 
 // EncodeListResponse is a transport/http.EncodeResponseFunc that encodes
@@ -195,22 +206,6 @@ func DecodeDisableRequest(_ context.Context, r *http.Request) (req interface{}, 
 // EncodeDisableResponse is a transport/http.EncodeResponseFunc that encodes
 // the response as JSON to the response writer. Primarily useful in a server.
 func EncodeDisableResponse(_ context.Context, w http.ResponseWriter, response interface{}) (err error) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	err = json.NewEncoder(w).Encode(response)
-	return err
-}
-
-// DecodeTryRequest is a transport/http.DecodeRequestFunc that decodes a
-// JSON-encoded request from the HTTP request body. Primarily useful in a server.
-func DecodeTryRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
-	req = endpoints.TryRequest{}
-	err = json.NewDecoder(r.Body).Decode(&r)
-	return req, err
-}
-
-// EncodeTryResponse is a transport/http.EncodeResponseFunc that encodes
-// the response as JSON to the response writer. Primarily useful in a server.
-func EncodeTryResponse(_ context.Context, w http.ResponseWriter, response interface{}) (err error) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	err = json.NewEncoder(w).Encode(response)
 	return err
