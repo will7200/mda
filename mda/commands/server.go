@@ -80,7 +80,7 @@ func server(cmd *cobra.Command, args []string) error {
 	}
 	//Dispatch.SetPersistStorage(db)
 	//fmt.Println(db.AutoMigrate(&job.Job{}, &job.JobStats{}).GetErrors())
-	d := da.NewDownloader(viper.GetString("interface.homedir"), db)
+	d := da.NewDownloader(viper.GetString("interface.home"), db)
 	svc := service.New(db, d)
 	ep := endpoints.New(svc)
 	r := mdahttp.NewHTTPHandler(ep)

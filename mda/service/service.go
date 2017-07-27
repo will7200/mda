@@ -99,7 +99,7 @@ func (md *stubMdaService) Remove(ctx context.Context, id string) (message string
 		return "", err
 	}
 	message = fmt.Sprintf("DA with id %s has been removed", d.ID)
-	return "", nil
+	return message, nil
 }
 
 // Implement the business logic of Change
@@ -108,7 +108,8 @@ func (md *stubMdaService) Change(ctx context.Context, id string, req da.DA) (mes
 	if err != nil {
 		return "", err
 	}
-	if err := md.db.Model(d).Update(md).Error; err != nil {
+	log.Debugf("%+v", req.Parameters)
+	if err := md.db.Model(d).Update(req).Error; err != nil {
 		err = fmt.Errorf("Cannot Update record with id %s;Database Error:%s", id, err.Error())
 		return "", err
 	}

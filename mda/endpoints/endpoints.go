@@ -97,7 +97,7 @@ func MakeAddEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(AddRequest)
 		id, err := svc.Add(ctx, req.Req)
-		return AddResponse{Id: id, Err: err}, nil
+		return AddResponse{Id: id, Err: err}, err
 	}
 }
 
@@ -107,7 +107,7 @@ func MakeStartEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(StartRequest)
 		message, err := svc.Start(ctx, req.Id)
-		return StartResponse{Message: message, Err: err}, nil
+		return StartResponse{Message: message, Err: err}, err
 	}
 }
 
@@ -117,7 +117,7 @@ func MakeRemoveEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(RemoveRequest)
 		message, err := svc.Remove(ctx, req.Id)
-		return RemoveResponse{Message: message, Err: err}, nil
+		return RemoveResponse{Message: message, Err: err}, err
 	}
 }
 
@@ -127,7 +127,7 @@ func MakeChangeEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(ChangeRequest)
 		message, err := svc.Change(ctx, req.Id, req.Req)
-		return ChangeResponse{Message: message, Err: err}, nil
+		return ChangeResponse{Message: message, Err: err}, err
 	}
 }
 
@@ -137,7 +137,7 @@ func MakeGetEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetRequest)
 		result, err := svc.Get(ctx, req.Id)
-		return GetResponse{Result: result, Err: err}, nil
+		return GetResponse{Result: result, Err: err}, err
 	}
 }
 
@@ -146,7 +146,7 @@ func MakeGetEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 func MakeListEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 	return func(ctx context.Context, _ interface{}) (interface{}, error) {
 		results, e := svc.List(ctx)
-		return ListResponse{Results: results, Err: e}, nil
+		return ListResponse{Results: results, Err: e}, e
 	}
 }
 
@@ -156,7 +156,7 @@ func MakeEnableEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(EnableRequest)
 		message, err := svc.Enable(ctx, req.Id)
-		return EnableResponse{Message: message, Err: err}, nil
+		return EnableResponse{Message: message, Err: err}, err
 	}
 }
 
@@ -166,6 +166,6 @@ func MakeDisableEndpoint(svc service.MdaService) (ep endpoint.Endpoint) {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(DisableRequest)
 		message, err := svc.Disable(ctx, req.Id)
-		return DisableResponse{Message: message, Err: err}, nil
+		return DisableResponse{Message: message, Err: err}, err
 	}
 }

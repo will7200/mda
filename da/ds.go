@@ -3,7 +3,6 @@ package da
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -47,16 +46,18 @@ func (d Metadata) Value() (driver.Value, error) {
 func (d *Metadata) Scan(src interface{}) error {
 	switch src := src.(type) {
 	case []byte:
-		var i interface{}
+		var i map[string]string
 		err := json.Unmarshal(src, &i)
 		if err != nil {
 			return err
 		}
-		var ok bool
+		*d = i
+		/*var ok bool
 		*d, ok = i.(map[string]string)
 		if !ok {
+			logrus.Debugf("Is format of %v", reflect.TypeOf(i))
 			return errors.New("Type assertion .(map[string]string) failed.")
-		}
+		}*/
 
 		return nil
 	case string:

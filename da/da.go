@@ -3,8 +3,6 @@ package da
 import (
 	"bufio"
 	"errors"
-	"fmt"
-	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -53,6 +51,7 @@ func NewDownloader(home string, db *gorm.DB) Downloader {
 
 func (d downloader) Add(da *DA) error {
 	if _, ok := queue[da.ID]; ok {
+		logrus.Debug("Not adding already in queue")
 		return ErrAlreadyInQueue
 	}
 	queue[da.ID] = da
@@ -89,7 +88,11 @@ func (d downloader) YoutubeDL(url string, parameters Metadata, da *DA) {
 
 	err = cmd.Start()
 	if err != nil {
-		fmt.Println("Process exiting with error ", err)
+		logrus.Info("Process exiting with error ", err)
+		logrus.Info("Could not continue with job")
+		logrus.Debug("This will not be logged")
+		delete(queue, da.ID)
+		return
 	}
 	//file, _ = os.Open("log_mjs.txt")
 	fs := bufio.NewScanner(stdpipe)
@@ -105,7 +108,7 @@ func (d downloader) YoutubeDL(url string, parameters Metadata, da *DA) {
 	go func() { done <- cmd.Wait() }()
 	select {
 	case err := <-done:
-		log.Println("Process exiting with error ", err)
+		logrus.Info("Process exiting with error ", err)
 		if err != nil {
 			stats.Success = false
 			stats.Error = err.Error()

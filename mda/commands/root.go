@@ -72,7 +72,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".test" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName("mjs")
+		viper.SetConfigName("mda")
 		viper.AddConfigPath(".")
 	}
 
