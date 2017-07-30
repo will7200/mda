@@ -47,7 +47,7 @@ func init() {
 	servercmd.Flags().String("homedir", "./mda/", "home directory to download into")
 	servercmd.Flags().BoolVar(&showHTTPDir, "httpdir", false, "Output the http directory")
 	//servercmd.Flags().Int("workers", 4, "amount of workers in pool")
-	viper.BindPFlag("port", servercmd.Flags().Lookup("port"))
+	viper.BindPFlag("interface.port", servercmd.Flags().Lookup("port"))
 	viper.BindPFlag("database.dbname", servercmd.Flags().Lookup("dbname"))
 	viper.BindPFlag("database.connection", servercmd.Flags().Lookup("connection"))
 	viper.BindPFlag("interface.workers", servercmd.Flags().Lookup("workers"))
