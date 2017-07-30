@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -56,7 +57,10 @@ func init() {
 	viper.BindEnv("VERBOSE", "verbose")
 }
 func server(cmd *cobra.Command, args []string) error {
+	fmt.Println(viper.GetBool("verbose"))
+	fmt.Println(os.Getenv("MDA_VERBOSE"))
 	if viper.GetBool("verbose") {
+		fmt.Println("YES")
 		log.SetLevel(log.DebugLevel)
 	}
 	var parsedPort string
