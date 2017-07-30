@@ -1,0 +1,23 @@
+package: github.com/will7200/mda
+import:
+- package: github.com/go-kit/kit
+  version: master
+  repo: https://github.com/go-kit/kit
+  vcs: git
+  subpackages:
+  - endpoint
+  - transport/http
+- package: github.com/gorilla/mux
+- package: github.com/jinzhu/gorm
+  version: master
+  repo: https://github.com/jinzhu/gorm.git
+  vcs: git
+  subpackages:
+  - dialects/mssql
+  - dialects/postgres
+  - dialects/sqlite
+- package: github.com/mitchellh/go-homedir
+- package: github.com/satori/go.uuid
+- package: github.com/sirupsen/logrus
+- package: github.com/spf13/cobra
+- package: github.com/spf13/viper

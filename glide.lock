@@ -1,0 +1,102 @@
+hash: 1985479281f046580134b822a998c4097a62d2572cfb7ffb4c3fe1d2fde6464a
+updated: 2017-07-29T21:04:16.9589191-07:00
+imports:
+- name: github.com/denisenkom/go-mssqldb
+  version: 84dc5e6cc4a674abe81be5bf7835f4ae3dced817
+- name: github.com/fsnotify/fsnotify
+  version: 4da3e2cfbabc9f751898f250b49f2439785783a1
+- name: github.com/go-kit/kit
+  version: 19463ea8b215413a29c3513aa3a76181f4bac58d
+  repo: https://github.com/go-kit/kit
+  vcs: git
+  subpackages:
+  - endpoint
+  - log
+  - transport/http
+- name: github.com/go-logfmt/logfmt
+  version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
+- name: github.com/go-stack/stack
+  version: 817915b46b97fd7bb80e8ab6b69f01a53ac3eebf
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: ac112f7d75a0714af1bd86ab17749b31f7809640
+- name: github.com/hashicorp/hcl
+  version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/scanner
+  - hcl/strconv
+  - hcl/token
+  - json/parser
+  - json/scanner
+  - json/token
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jinzhu/gorm
+  version: 5b8c0dd6b92d9caa8036c31dcb117f2df7cceefa
+  repo: https://github.com/jinzhu/gorm.git
+  vcs: git
+  subpackages:
+  - dialects/mssql
+  - dialects/postgres
+  - dialects/sqlite
+- name: github.com/jinzhu/inflection
+  version: 1c35d901db3da928c72a72d8458480cc9ade058f
+- name: github.com/kr/logfmt
+  version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
+- name: github.com/lib/pq
+  version: dd1fe2071026ce53f36a39112e645b4d4f5793a4
+  subpackages:
+  - hstore
+  - oid
+- name: github.com/magiconair/properties
+  version: be5ece7dd465ab0765a9682137865547526d1dfb
+- name: github.com/mattn/go-sqlite3
+  version: 47fc4e5e9153645da45af6a86a5bce95e63a0f9e
+- name: github.com/mitchellh/go-homedir
+  version: b8bc1bf767474819792c23f32d8286a45736f1c6
+- name: github.com/mitchellh/mapstructure
+  version: d0303fe809921458f417bcf828397a65db30a7e4
+- name: github.com/pelletier/go-toml
+  version: 69d355db5304c0f7f809a2edc054553e7142f016
+- name: github.com/satori/go.uuid
+  version: 5bf94b69c6b68ee1b541973bb8e1144db23a194b
+- name: github.com/sirupsen/logrus
+  version: 181d419aa9e2223811b824e8f0b4af96f9ba9302
+- name: github.com/spf13/afero
+  version: 9be650865eab0c12963d8753212f4f9c66cdcf12
+  subpackages:
+  - mem
+- name: github.com/spf13/cast
+  version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
+- name: github.com/spf13/cobra
+  version: 34594c771f2c18301dc152640ad40ece28795373
+- name: github.com/spf13/jwalterweatherman
+  version: 0efa5202c04663c757d84f90f5219c1250baf94f
+- name: github.com/spf13/pflag
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+- name: github.com/spf13/viper
+  version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
+- name: golang.org/x/crypto
+  version: 558b6879de74bc843225cde5686419267ff707ca
+  subpackages:
+  - md4
+  - ssh/terminal
+- name: golang.org/x/net
+  version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
+  subpackages:
+  - context
+- name: golang.org/x/sys
+  version: 0f826bdd13b500be0f1d4004938ad978fcc6031e
+  subpackages:
+  - unix
+- name: golang.org/x/text
+  version: a467ab3c3977c4a820c2a4a886d54eb7d68901f0
+  subpackages:
+  - transform
+  - unicode/norm
+- name: gopkg.in/yaml.v2
+  version: 25c4ec802a7d637f88d584ab26798e94ad14c13b
+testImports: []
