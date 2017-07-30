@@ -52,21 +52,23 @@ func init() {
 	viper.BindPFlag("database.connection", servercmd.Flags().Lookup("connection"))
 	viper.BindPFlag("interface.workers", servercmd.Flags().Lookup("workers"))
 	viper.BindPFlag("interface.home", servercmd.Flags().Lookup("homedir"))
+	viper.SetEnvPrefix("MDA") // will be uppercased automatically
+	viper.BindEnv("VERBOSE", "verbose")
 }
 func server(cmd *cobra.Command, args []string) error {
-	if verbose {
+	if viper.GetBool("verbose") {
 		log.SetLevel(log.DebugLevel)
 	}
 	var parsedPort string
-	if port != 0 {
-		parsedPort = fmt.Sprintf(":%d", port)
+	if viper.GetInt("interface.port") != 0 {
+		parsedPort = fmt.Sprintf(":%d", viper.GetInt("interface.port"))
 	} else {
 		parsedPort = ":4004"
 	}
 	//Dispatch = &job.Dispatcher{}
 	//Dispatch.StartDispatcher(viper.GetInt("interface.workers"))
 	db, err = gorm.Open(viper.GetString("database.dbname"), viper.GetString("database.connection"))
-	if verbose {
+	if viper.GetBool("verbose") {
 		db.LogMode(true)
 	}
 	if err != nil {
@@ -104,7 +106,7 @@ func server(cmd *cobra.Command, args []string) error {
 			return nil
 		})
 	}
-	log.Infof("Starting Server on port %d", port)
+	log.Infof("Starting Server on port %d", viper.GetInt("interface.port"))
 	server := &http.Server{
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 7 * time.Second,
