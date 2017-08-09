@@ -3,7 +3,6 @@ package commands
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -48,19 +47,18 @@ func init() {
 	servercmd.Flags().String("homedir", "./mda/", "home directory to download into")
 	servercmd.Flags().BoolVar(&showHTTPDir, "httpdir", false, "Output the http directory")
 	//servercmd.Flags().Int("workers", 4, "amount of workers in pool")
+	viper.BindPFlag("verbose", servercmd.Flags().Lookup("verbose"))
 	viper.BindPFlag("interface.port", servercmd.Flags().Lookup("port"))
 	viper.BindPFlag("database.dbname", servercmd.Flags().Lookup("dbname"))
 	viper.BindPFlag("database.connection", servercmd.Flags().Lookup("connection"))
 	viper.BindPFlag("interface.workers", servercmd.Flags().Lookup("workers"))
 	viper.BindPFlag("interface.home", servercmd.Flags().Lookup("homedir"))
 	viper.SetEnvPrefix("MDA") // will be uppercased automatically
-	viper.BindEnv("VERBOSE", "verbose")
+	//viper.BindEnv("VERBOSE", "verbose")
 }
 func server(cmd *cobra.Command, args []string) error {
-	fmt.Println(viper.GetBool("verbose"))
-	fmt.Println(os.Getenv("MDA_VERBOSE"))
-	if viper.GetBool("verbose") {
-		fmt.Println("YES")
+	verbose = viper.GetBool("verbose")
+	if verbose {
 		log.SetLevel(log.DebugLevel)
 	}
 	var parsedPort string
@@ -72,7 +70,7 @@ func server(cmd *cobra.Command, args []string) error {
 	//Dispatch = &job.Dispatcher{}
 	//Dispatch.StartDispatcher(viper.GetInt("interface.workers"))
 	db, err = gorm.Open(viper.GetString("database.dbname"), viper.GetString("database.connection"))
-	if viper.GetBool("verbose") {
+	if verbose {
 		db.LogMode(true)
 	}
 	if err != nil {
