@@ -56,8 +56,9 @@ func init() {
 	viper.BindPFlag("interface.home", servercmd.Flags().Lookup("homedir"))
 	viper.SetEnvPrefix("MDA") // will be uppercased automatically
 	viper.BindEnv("verbose")
-	viper.BindEnv("remote_schedular_rpc")
-	viper.BindEnv("local_url")
+	viper.BindEnv("mjs_service_grpc")
+	viper.BindEnv("acl_token")
+	viper.BindEnv("consul_address")
 }
 func server(cmd *cobra.Command, args []string) error {
 	verbose = viper.GetBool("verbose") || verbose

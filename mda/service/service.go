@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/spf13/viper"
 	"github.com/will7200/mjs/job"
+	"github.com/will7200/regconsul/client"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -187,7 +189,21 @@ func (md *stubMdaService) AddToSchedular(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	conn, err := grpc.Dial(viper.Get("remote_schedular_rpc").(string), grpc.WithInsecure())
+	cli, err := client.NewConsulClient(viper.GetString("consul_address"), viper.GetString("acl_token"))
+	if err != nil {
+		return err
+	}
+	addresses, _, err := cli.Service(viper.GetString("mjs_service_grpc"), "")
+	if err != nil {
+		return err
+	}
+	if len(addresses) < 1 {
+		return fmt.Errorf("Cannot query consul %s with token %s for service %s",
+			viper.GetString("consul_address"), viper.GetString("acl_token"),
+			viper.GetString("mjs_service_grpc"))
+	}
+	address := addresses[0]
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address.Service.Address, address.Service.Port), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
@@ -201,7 +217,7 @@ func (md *stubMdaService) AddToSchedular(ctx context.Context, id string) error {
 		metadata.Pairs(apischeduler.JobUniqueness, "UNIQUE"))
 	_, err = c.Add(ctxx, &pb.AddRequest{Reqjob: &pb.Job{
 		Name:        fmt.Sprintf("%s", d.ID),
-		Command:     []string{"curl", "--request", "POST", fmt.Sprintf("%s/mda/start/%s", viper.Get("local_url").(string), d.ID)},
+		Command:     []string{"curl", "--request", "POST", fmt.Sprintf("http://%s:%d/mda/start/%s", GetOutboundIP().String(), viper.GetInt("interface.port"), d.ID)},
 		Schedule:    fmt.Sprintf("R/%s/P1W", time.Now().Add(time.Second*10).UTC().Format(job.RFC3339WithoutTimezone)),
 		Application: "MDA",
 		Domain:      "Local Area",
@@ -210,4 +226,16 @@ func (md *stubMdaService) AddToSchedular(ctx context.Context, id string) error {
 		return err
 	}
 	return nil
+}
+
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
 }
