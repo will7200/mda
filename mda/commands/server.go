@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -49,6 +48,7 @@ func init() {
 	servercmd.Flags().String("homedir", "./mda/", "home directory to download into")
 	servercmd.Flags().BoolVar(&showHTTPDir, "httpdir", false, "Output the http directory")
 	//servercmd.Flags().Int("workers", 4, "amount of workers in pool")
+	viper.BindPFlag("verbose", servercmd.Flags().Lookup("verbose"))
 	viper.BindPFlag("interface.port", servercmd.Flags().Lookup("port"))
 	viper.BindPFlag("database.dbname", servercmd.Flags().Lookup("dbname"))
 	viper.BindPFlag("database.connection", servercmd.Flags().Lookup("connection"))
@@ -60,10 +60,10 @@ func init() {
 	viper.BindEnv("local_url")
 }
 func server(cmd *cobra.Command, args []string) error {
-	if viper.GetBool("verbose") || verbose {
+	verbose = viper.GetBool("verbose") || verbose
+	if verbose {
 		log.SetLevel(log.DebugLevel)
 	}
-	log.Info(viper.Get("remote_schedular_rpc"), os.Getenv("MDA_REMOTE_SCHEDULAR_RPC"))
 	var parsedPort string
 	if viper.GetInt("interface.port") != 0 {
 		parsedPort = fmt.Sprintf(":%d", viper.GetInt("interface.port"))
@@ -71,13 +71,12 @@ func server(cmd *cobra.Command, args []string) error {
 		parsedPort = ":4004"
 	}
 	db, err = gorm.Open(viper.GetString("database.dbname"), viper.GetString("database.connection"))
-	if viper.GetBool("verbose") {
+	if verbose {
 		db.LogMode(true)
 	}
 	if err != nil {
 		panic(fmt.Sprintf("failed to connect database \ntype %s with connection %s", viper.GetString("database.dbname"), viper.GetString("database.connection")))
 	}
-	//api.CreateDatabaseTables(db)
 	if errors := db.AutoMigrate(&da.DA{}, &da.Stats{}).GetErrors(); len(errors) != 0 {
 		fmt.Printf("Cound not auto migrate tables for reasons below %v", errors)
 		fmt.Println()

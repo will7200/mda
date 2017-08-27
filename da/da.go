@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -45,7 +46,7 @@ func NewDownloader(home string, db *gorm.DB) Downloader {
 	for index, value := range pdefault {
 		def[index] = value
 	}
-	def["-o"] = home + "%(playlist)s\\%(upload_date)s\\%(id)s__%(title)s.%(ext)s"
+	def["-o"] = home + filepath.Join("%(playlist)s", "%(upload_date)s", "%(id)s__%(title)s.%(ext)s")
 	return downloader{home, def, db}
 }
 
