@@ -197,7 +197,7 @@ func (md *stubMdaService) AddToSchedular(ctx context.Context, id string) error {
 	//fmt.Printf("Error %+v\n", errr)
 	// Contact the server and print out its response.
 	ctxx := context.Background()
-	ctxx = metadata.NewContext(ctx,
+	ctxx = metadata.NewOutgoingContext(ctx,
 		metadata.Pairs(apischeduler.JobUniqueness, "UNIQUE"))
 	_, err = c.Add(ctxx, &pb.AddRequest{Reqjob: &pb.Job{
 		Name:        fmt.Sprintf("%s", d.ID),
