@@ -4,10 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/spf13/viper"
+	"github.com/will7200/mjs/job"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	"github.com/will7200/mda/da"
+	"github.com/will7200/mjs/apischeduler"
+	"github.com/will7200/mjs/apischeduler/grpc/pb"
 )
 
 // Implement yor service methods methods.
@@ -37,6 +46,7 @@ type MdaService interface {
 	//METHODS: POST
 	//PATH: /disable
 	Disable(ctx context.Context, id string) (message string, err error)
+	AddToSchedular(ctx context.Context, id string) error
 }
 type stubMdaService struct {
 	db *gorm.DB
@@ -70,6 +80,11 @@ func (md *stubMdaService) Add(ctx context.Context, req da.DA) (id string, err er
 	}
 	id = req.ID
 	log.Debugf("%+v", req)
+	err = md.AddToSchedular(ctx, id)
+	if err != nil {
+		log.Debug("DA created but could not be added to remote schedular for reason %s", err.Error())
+		return id, nil
+	}
 	return id, err
 }
 
@@ -125,7 +140,6 @@ func (md *stubMdaService) Get(ctx context.Context, id string) (result *da.DA, er
 		err = fmt.Errorf("Error: %s;\nDatabaseError:%s", ErrDaDNE, err.Error())
 		return nil, err
 	}
-	log.Debugf("%+v", dd)
 	result = dd
 	return result, err
 }
@@ -166,4 +180,34 @@ func (md *stubMdaService) Disable(ctx context.Context, id string) (message strin
 	}
 	message = fmt.Sprintf("DA with id %s has been disabled", d.ID)
 	return message, err
+}
+
+func (md *stubMdaService) AddToSchedular(ctx context.Context, id string) error {
+	d, err := md.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	conn, err := grpc.Dial(viper.Get("remote_schedular_rpc").(string), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	c := pb.NewAPISchedulerClient(conn)
+	//rr, errr := c.Start(context.Background(), &pb.StartRequest{})
+	//fmt.Printf("Error %+v\n", errr)
+	// Contact the server and print out its response.
+	ctxx := context.Background()
+	ctxx = metadata.NewContext(ctx,
+		metadata.Pairs(apischeduler.JobUniqueness, "UNIQUE"))
+	_, err = c.Add(ctxx, &pb.AddRequest{Reqjob: &pb.Job{
+		Name:        fmt.Sprintf("%s", d.ID),
+		Command:     []string{"curl", "--request", "POST", fmt.Sprintf("%s/mda/start/%s", viper.Get("local_url").(string), d.ID)},
+		Schedule:    fmt.Sprintf("R/%s/P1W", time.Now().Add(time.Second*10).UTC().Format(job.RFC3339WithoutTimezone)),
+		Application: "MDA",
+		Domain:      "Local Area",
+	}})
+	if err != nil {
+		return err
+	}
+	return nil
 }

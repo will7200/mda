@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -54,23 +55,21 @@ func init() {
 	viper.BindPFlag("interface.workers", servercmd.Flags().Lookup("workers"))
 	viper.BindPFlag("interface.home", servercmd.Flags().Lookup("homedir"))
 	viper.SetEnvPrefix("MDA") // will be uppercased automatically
-	viper.BindEnv("VERBOSE", "verbose")
+	viper.BindEnv("verbose")
+	viper.BindEnv("remote_schedular_rpc")
+	viper.BindEnv("local_url")
 }
 func server(cmd *cobra.Command, args []string) error {
-	fmt.Println(viper.GetBool("verbose"))
-	fmt.Println(os.Getenv("MDA_VERBOSE"))
-	if viper.GetBool("verbose") {
-		fmt.Println("YES")
+	if viper.GetBool("verbose") || verbose {
 		log.SetLevel(log.DebugLevel)
 	}
+	log.Info(viper.Get("remote_schedular_rpc"), os.Getenv("MDA_REMOTE_SCHEDULAR_RPC"))
 	var parsedPort string
 	if viper.GetInt("interface.port") != 0 {
 		parsedPort = fmt.Sprintf(":%d", viper.GetInt("interface.port"))
 	} else {
 		parsedPort = ":4004"
 	}
-	//Dispatch = &job.Dispatcher{}
-	//Dispatch.StartDispatcher(viper.GetInt("interface.workers"))
 	db, err = gorm.Open(viper.GetString("database.dbname"), viper.GetString("database.connection"))
 	if viper.GetBool("verbose") {
 		db.LogMode(true)
@@ -84,33 +83,15 @@ func server(cmd *cobra.Command, args []string) error {
 		fmt.Println()
 		panic("Could not make/migrate tables")
 	}
-	//Dispatch.SetPersistStorage(db)
-	//fmt.Println(db.AutoMigrate(&job.Job{}, &job.JobStats{}).GetErrors())
 	d := da.NewDownloader(viper.GetString("interface.home"), db)
 	svc := service.New(db, d)
 	ep := endpoints.New(svc)
 	r := mdahttp.NewHTTPHandler(ep)
 	if verbose || showHTTPDir {
-		r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
-			t, err := route.GetPathTemplate()
-			if err != nil {
-				return err
-			}
-			// p will contain regular expression is compatible with regular expression in Perl, Python, and other languages.
-			// for instance the regular expression for path '/articles/{id}' will be '^/articles/(?P<v0>[^/]+)$'
-			p, err := route.GetPathRegexp()
-			if err != nil {
-				return err
-			}
-			m, err := route.GetMethods()
-			if err != nil {
-				return err
-			}
-			fmt.Println(strings.Join(m, ","), t, p)
-			return nil
-		})
+		showHTTPPaths(r)
 	}
 	log.Infof("Starting Server on port %d", viper.GetInt("interface.port"))
+	go AddtoSchedular(db, &svc)
 	server := &http.Server{
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 7 * time.Second,
@@ -118,4 +99,37 @@ func server(cmd *cobra.Command, args []string) error {
 		Handler:      r,
 	}
 	return server.ListenAndServe()
+}
+
+func AddtoSchedular(db *gorm.DB, s *service.MdaService) {
+	das := []da.DA{}
+	db.Find(&das)
+	ss := *s
+	for _, da := range das {
+		err := ss.AddToSchedular(context.Background(), da.ID)
+		if err != nil && !strings.Contains(err.Error(), "Job already exists") {
+			log.Error(err)
+		}
+	}
+}
+
+func showHTTPPaths(r *mux.Router) {
+	r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+		t, err := route.GetPathTemplate()
+		if err != nil {
+			return err
+		}
+		// p will contain regular expression is compatible with regular expression in Perl, Python, and other languages.
+		// for instance the regular expression for path '/articles/{id}' will be '^/articles/(?P<v0>[^/]+)$'
+		p, err := route.GetPathRegexp()
+		if err != nil {
+			return err
+		}
+		m, err := route.GetMethods()
+		if err != nil {
+			return err
+		}
+		fmt.Println(strings.Join(m, ","), t, p)
+		return nil
+	})
 }

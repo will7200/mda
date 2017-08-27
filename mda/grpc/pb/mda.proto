@@ -1,0 +1,60 @@
+syntax = "proto3";
+package pb;
+// The Mda service definition.
+service Mda {
+ rpc Add (AddRequest) returns (AddReply) {}
+ rpc Start (StartRequest) returns (StartReply) {}
+ rpc Remove (RemoveRequest) returns (RemoveReply) {}
+ rpc Change (ChangeRequest) returns (ChangeReply) {}
+ rpc Get (GetRequest) returns (GetReply) {}
+ rpc List (ListRequest) returns (ListReply) {}
+ rpc Enable (EnableRequest) returns (EnableReply) {}
+ rpc Disable (DisableRequest) returns (DisableReply) {}
+}
+message AddRequest {
+}
+message AddReply {
+}
+message StartRequest {
+    string Id = 1;
+}
+message StartReply {
+    string message = 1;
+    int64 error = 2;
+}
+message RemoveRequest {
+    string Id = 1;
+}
+message RemoveReply {
+    string message = 1;
+    int64 error = 2;
+}
+message ChangeRequest {
+}
+message ChangeReply {
+}
+message GetRequest {
+    string Id = 1;
+}
+message GetReply {
+    string message = 1;
+    int64 error = 2;
+}
+message ListRequest {
+}
+message ListReply {
+}
+message EnableRequest {
+    string Id = 1;
+}
+message EnableReply {
+    string message = 1;
+    int64 error = 2;
+}
+message DisableRequest {
+    string Id = 1;
+}
+message DisableReply {
+    string message = 1;
+    int64 error = 2;
+}
